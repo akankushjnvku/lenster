@@ -1,8 +1,10 @@
 import axios from 'axios';
-import { DATADOG_TOKEN, IS_PRODUCTION, LEAFWATCH_HOST } from 'src/constants';
-import { v4 as uuid } from 'uuid';
+import { AXIOM_TOKEN, IS_PRODUCTION, LEAFWATCH_HOST } from 'src/constants';
+import parser from 'ua-parser-js';
 
-const enabled = DATADOG_TOKEN && IS_PRODUCTION;
+import getUserLocale from './getUserLocale';
+
+const enabled = AXIOM_TOKEN && IS_PRODUCTION;
 const isBrowser = typeof window !== 'undefined';
 
 /**
@@ -10,28 +12,31 @@ const isBrowser = typeof window !== 'undefined';
  */
 export const Leafwatch = {
   track: (name: string, options?: Record<string, any>) => {
+    const ua = parser(navigator.userAgent);
     const { state } = JSON.parse(
       localStorage.getItem('lenster.store') || JSON.stringify({ state: { profileId: null } })
     );
-    const ip = sessionStorage.getItem('ip');
 
-    if (isBrowser && enabled && ip) {
+    if (isBrowser && enabled) {
       axios(LEAFWATCH_HOST, {
         method: 'POST',
-        params: {
-          'dd-api-key': DATADOG_TOKEN,
-          'dd-request-id': uuid()
+        headers: {
+          Authorization: `Bearer ${AXIOM_TOKEN}`,
+          'Content-Type': 'application/x-ndjson'
         },
         data: {
-          ddsource: 'browser',
           event: name,
           profile: state.profileId,
           props: options,
           url: location.href,
           referrer: document.referrer,
           sha: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA,
-          useragent: navigator.userAgent,
-          ip
+          browser: {
+            name: ua.browser.name,
+            version: ua.browser.version,
+            language: getUserLocale()
+          },
+          device: { os: ua.os.name }
         }
       }).catch(() => {
         console.error('Error while sending analytics event to Leafwatch');

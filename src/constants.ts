@@ -41,8 +41,8 @@ export const RELAY_ON = process.env.NEXT_PUBLIC_RELAY_ON === 'true';
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 // Leafwatch
-export const DATADOG_TOKEN = process.env.NEXT_PUBLIC_DATADOG_TOKEN ?? '';
-export const LEAFWATCH_HOST = 'https://logs.browser-intake-datadoghq.eu/api/v2/logs';
+export const AXIOM_TOKEN = process.env.NEXT_PUBLIC_AXIOM_TOKEN ?? '';
+export const LEAFWATCH_HOST = 'https://cloud.axiom.co/api/v1/datasets/leafwatch/ingest';
 
 // Messages
 export const ERROR_MESSAGE = 'Something went wrong!';
